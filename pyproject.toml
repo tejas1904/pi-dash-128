@@ -1,0 +1,24 @@
+[project]
+name = "pi-dash-128"
+version = "0.1.0"
+description = "A compact Raspberry Pi dashboard for 128x64 I2C OLED displays"
+readme = "README.md"
+authors = [
+    { name = "tejas", email = "tejasboss1904@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "luma-oled>=3.15.0",
+    "psutil>=7.2.2",
+    "python-dotenv>=1.2.2",
+]
+
+[project.scripts]
+pi-dash-128 = "pi_dash_128.main:main"
+pidash128-hello-test = "pi_dash_128.scripts.displaytests.hello_world:main"
+pidash128-resolution-test = "pi_dash_128.scripts.displaytests.resolution:main"
+pidash128-system-info = "pi_dash_128.system_monitor:main"
+
+[build-system]
+requires = ["uv_build>=0.12.3,<0.13.0"]
+build-backend = "uv_build"
