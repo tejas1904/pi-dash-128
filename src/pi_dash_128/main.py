@@ -14,6 +14,7 @@ from pi_dash_128.weather import Weather, WeatherService
 BAR_SMOOTHING = 0.2
 WEATHER_REFRESH_SECONDS = 15 * 60
 WEATHER_SWITCH_SECONDS = 3
+NETWORK_REFRESH_SECONDS = 10
 
 
 def draw_usage_bar(
@@ -133,6 +134,7 @@ def main() -> None:
     ticker_started = time.monotonic()
     last_metrics_update = time.monotonic()
     last_weather_update = time.monotonic()
+    last_network_update = time.monotonic()
     smooth_cpu = metrics.cpu_percent
     smooth_ram = metrics.ram_percent
 
@@ -148,6 +150,17 @@ def main() -> None:
             if time.monotonic() - last_weather_update >= WEATHER_REFRESH_SECONDS:
                 weather = weather_service.get_current()
                 last_weather_update = time.monotonic()
+
+            if time.monotonic() - last_network_update >= NETWORK_REFRESH_SECONDS:
+                refreshed_info = info_provider.read()
+                last_network_update = time.monotonic()
+                if refreshed_info != info:
+                    info = refreshed_info
+                    ticker = ticker_text(info)
+                    ticker_width = int(
+                        ImageDraw.Draw(Image.new("1", (1, 1))).textlength(ticker)
+                    )
+                    ticker_started = time.monotonic()
 
             # Move the displayed bars gradually toward the latest measurements.
             smooth_cpu += (metrics.cpu_percent - smooth_cpu) * BAR_SMOOTHING
