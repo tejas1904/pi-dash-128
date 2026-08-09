@@ -37,3 +37,32 @@ uv run pidash128-system-info
 
 Display settings and animation speed are configurable in `.env`. Weather is
 provided by [wttr.in](https://wttr.in/) using IP-based location detection.
+
+## Start automatically
+
+Install and start the systemd user service:
+
+```bash
+uv sync
+./scripts/install-service.sh
+sudo loginctl enable-linger "$USER"
+```
+
+Linger allows the user service to start during boot without an interactive
+login. While developing, stop the background dashboard before running it
+manually:
+
+```bash
+systemctl --user stop pi-dash-128
+uv run pi-dash-128
+```
+
+Useful service commands:
+
+```bash
+systemctl --user start pi-dash-128
+systemctl --user restart pi-dash-128
+systemctl --user status pi-dash-128
+journalctl --user -u pi-dash-128 -f
+systemctl --user disable --now pi-dash-128
+```

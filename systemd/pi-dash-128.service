@@ -1,0 +1,13 @@
+[Unit]
+Description=PiDash128 OLED system dashboard
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=@PROJECT_DIR@
+ExecStart=@PROJECT_DIR@/scripts/run.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
