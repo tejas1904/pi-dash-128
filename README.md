@@ -37,6 +37,9 @@ uv run pidash128-system-info
 
 Display settings and animation speed are configurable in `.env`. Weather is
 provided by [wttr.in](https://wttr.in/) using IP-based location detection.
+Set `WEATHER_UNIT=C` or `WEATHER_UNIT=F` to choose the outdoor temperature unit.
+Weather icons use [Font Awesome Free](https://fontawesome.com/) under the SIL
+Open Font License included with the packaged font.
 
 ## Start automatically
 

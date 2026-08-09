@@ -98,6 +98,7 @@ class MonitorConfig:
     refresh_seconds: float
     frame_seconds: float
     scroll_pixels_per_second: float
+    weather_unit: str
 
     @classmethod
     def from_env(cls) -> "MonitorConfig":
@@ -105,7 +106,8 @@ class MonitorConfig:
         config = cls(
             refresh_seconds=_number("MONITOR_REFRESH_SECONDS", "0.5"),
             frame_seconds=_number("MONITOR_FRAME_SECONDS", "0.1"),
-            scroll_pixels_per_second=_number("MONITOR_SCROLL_SPEED", "20"),
+            scroll_pixels_per_second=_number("MONITOR_SCROLL_SPEED", "10"),
+            weather_unit=os.getenv("WEATHER_UNIT", "C").strip().upper(),
         )
         config.validate()
         return config
@@ -117,3 +119,5 @@ class MonitorConfig:
             raise ValueError("MONITOR_FRAME_SECONDS must be greater than zero")
         if self.scroll_pixels_per_second <= 0:
             raise ValueError("MONITOR_SCROLL_SPEED must be greater than zero")
+        if self.weather_unit not in ("C", "F"):
+            raise ValueError("WEATHER_UNIT must be C or F")

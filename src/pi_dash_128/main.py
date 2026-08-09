@@ -9,6 +9,7 @@ from pi_dash_128.config import DisplayConfig, MonitorConfig
 from pi_dash_128.system_info import SystemInfo, SystemInfoProvider
 from pi_dash_128.system_monitor import MetricsSnapshot, SystemMonitor
 from pi_dash_128.weather import Weather, WeatherService
+from pi_dash_128.weather_display import draw_weather
 
 
 BAR_SMOOTHING = 0.2
@@ -67,6 +68,7 @@ def render_dashboard(
     metrics: MetricsSnapshot,
     info: SystemInfo,
     weather: Weather,
+    weather_unit: str,
     show_weather_location: bool,
     scroll_x: int,
 ) -> Image.Image:
@@ -98,15 +100,14 @@ def render_dashboard(
 
     bottom_y = height - 13
     ticker_left = width // 2 + 2
-    if show_weather_location:
-        weather_text = weather.location
-    elif weather.temperature_f is not None:
-        weather_text = f"{weather.temperature_f}F {weather.condition}"
-    else:
-        weather_text = weather.condition
-
     draw.line((0, 45, width - 1, 45), fill="white")
-    draw.text((2, bottom_y), weather_text[:10], fill="white")
+    draw_weather(
+        draw,
+        weather,
+        weather_unit,
+        show_weather_location,
+        position=(2, bottom_y),
+    )
 
     # Draw the ticker on its own image, then hide the part behind weather.
     ticker_image = Image.new("1", size)
@@ -189,6 +190,7 @@ def main() -> None:
                 smooth_metrics,
                 info,
                 weather,
+                monitor_config.weather_unit,
                 show_weather_location,
                 scroll_x,
             )
