@@ -35,18 +35,14 @@ uv run pidash128-resolution-test
 uv run pidash128-system-info
 ```
 
-Display settings and the selected page are configurable in `.env`. Set
-`DASHBOARD_DESIGN=classic` to select the included design. Each design is kept
-in its own folder under `src/pi_dash_128/designs/`, including its own
-`config.py`, `config.env`, and a `page.py` containing a `Design` class. To add
-a design, create another design folder; no central registration is needed.
-The classic page reads its settings from `designs/classic/config.env`.
-The BioTech HUD reads its settings from `designs/biotech/config.env` and can
-be selected with `DASHBOARD_DESIGN=biotech`.
+## Designs
 
-Included animated designs are selected by setting `DASHBOARD_DESIGN` to one
-of these folder names:
+Select a display design in `.env` with `DASHBOARD_DESIGN`; the default is
+`classic`.
 
+Available designs are:
+
+- `classic` — CPU and RAM bars, weather, and a scrolling network ticker
 - `biotech` — living cell colonies, bio-link status, and molecular animation
 - `alien` — C-shaped living cells with animated liquid fill
 - `cyberpunk` — Neuromancer ICE deck with animated circuit-board traces
@@ -54,8 +50,11 @@ of these folder names:
 - `f1` — rev lights, segmented meters, CPU trace, system and network telemetry
 - `steampunk` — gauges, rotating gears, and rising steam
 
-Weather is
-provided by [wttr.in](https://wttr.in/) using IP-based location detection.
+Design-specific settings are stored in the selected design's `config.env`.
+To add another design, create a design folder following the same structure;
+no central registration is needed.
+
+Weather is provided by [wttr.in](https://wttr.in/) using IP-based location detection.
 Set `WEATHER_UNIT=C` or `WEATHER_UNIT=F` in the page's `config.env` to choose
 the outdoor temperature unit.
 Weather icons use [Font Awesome Free](https://fontawesome.com/) under the SIL
