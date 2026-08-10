@@ -1,4 +1,4 @@
-"""Render weather information and Font Awesome weather icons."""
+"""Render weather information for the classic design."""
 
 from pathlib import Path
 
@@ -8,7 +8,7 @@ from pi_dash_128.weather import Weather
 
 
 ICON_FONT = ImageFont.truetype(
-    Path(__file__).parent / "assets/fonts/fontawesome-solid.otf",
+    Path(__file__).parents[2] / "assets/fonts/fontawesome-solid.otf",
     size=10,
 )
 
