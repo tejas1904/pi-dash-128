@@ -1,0 +1,1 @@
+"""Animated Formula telemetry design."""
