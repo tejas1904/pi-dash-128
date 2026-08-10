@@ -1,6 +1,6 @@
 # PiDash128
 
-PiDash128 is a compact Raspberry Pi dashboard for a 128×64 I²C OLED. It shows
+PiDash128 is a compact Raspberry Pi dashboard/System monitor using a 128×64 I²C OLED. It shows
 CPU load, temperature, RAM usage, IP-based weather, and scrolling user/network
 information.
 
