@@ -1,5 +1,6 @@
 """Animated one-bit Formula racing telemetry page."""
 
+from dataclasses import replace
 import time
 
 from PIL import Image, ImageDraw, ImageFont
@@ -135,6 +136,8 @@ class Design:
         info = info_provider.read()
         started = updated = time.monotonic()
         cpu_history = [metrics.cpu_percent]
+        smooth_cpu = metrics.cpu_percent
+        smooth_ram = metrics.ram_percent
 
         while True:
             frame_started = time.monotonic()
@@ -145,8 +148,17 @@ class Design:
                 cpu_history.append(metrics.cpu_percent)
                 cpu_history = cpu_history[-61:]
                 updated = now
+            smooth_cpu += (metrics.cpu_percent - smooth_cpu) * self.config.bar_smoothing
+            smooth_ram += (metrics.ram_percent - smooth_ram) * self.config.bar_smoothing
+            smooth_metrics = replace(
+                metrics, cpu_percent=smooth_cpu, ram_percent=smooth_ram
+            )
             phase = int((now - started) / self.config.frame_seconds) if self.config.animate else 0
             panel = int((now - started) / self.config.info_switch_seconds) % 3
-            device.display(render_dashboard(device.size, metrics, info, panel, cpu_history, phase))
+            device.display(
+                render_dashboard(
+                    device.size, smooth_metrics, info, panel, cpu_history, phase
+                )
+            )
             elapsed = time.monotonic() - frame_started
             time.sleep(max(0, self.config.frame_seconds - elapsed))

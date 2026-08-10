@@ -1,5 +1,6 @@
 """Alien HUD with animated broken-cell liquid meters."""
 
+from dataclasses import replace
 import time
 
 from PIL import Image, ImageDraw, ImageFont
@@ -124,6 +125,8 @@ class Design:
         monitor, info_provider, weather_service = SystemMonitor(), SystemInfoProvider(), WeatherService()
         metrics, info, weather = monitor.read(0.1), info_provider.read(), weather_service.get_current()
         started = metrics_at = weather_at = network_at = time.monotonic()
+        smooth_cpu = metrics.cpu_percent
+        smooth_ram = metrics.ram_percent
         while True:
             frame_at = now = time.monotonic()
             if now - metrics_at >= config.refresh:
@@ -132,7 +135,10 @@ class Design:
                 weather, weather_at = weather_service.get_current(), now
             if now - network_at >= config.network_refresh:
                 info, network_at = info_provider.read(), now
+            smooth_cpu += (metrics.cpu_percent - smooth_cpu) * config.bar_smoothing
+            smooth_ram += (metrics.ram_percent - smooth_ram) * config.bar_smoothing
+            smooth_metrics = replace(metrics, cpu_percent=smooth_cpu, ram_percent=smooth_ram)
             phase = int((now - started) / config.frame) if config.animate else None
             show_network = int(now / config.info_switch) % 2 == 1
-            device.display(render_dashboard(device.size, metrics, info, weather, config.weather_unit, show_network, phase))
+            device.display(render_dashboard(device.size, smooth_metrics, info, weather, config.weather_unit, show_network, phase))
             time.sleep(max(0, config.frame - (time.monotonic() - frame_at)))

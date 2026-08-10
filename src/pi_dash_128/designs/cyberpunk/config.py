@@ -10,6 +10,7 @@ from dotenv import dotenv_values
 class Config:
     refresh: float
     frame: float
+    bar_smoothing: float
     weather_unit: str
     weather_refresh: float
     network_refresh: float
@@ -26,4 +27,7 @@ class Config:
         unit = (values.get("WEATHER_UNIT") or "F").upper()
         if unit not in ("C", "F"):
             raise ValueError("WEATHER_UNIT must be C or F")
-        return cls(number("REFRESH_SECONDS", "0.5"), number("FRAME_SECONDS", "0.1"), unit, number("WEATHER_REFRESH_SECONDS", "900"), number("NETWORK_REFRESH_SECONDS", "10"), number("INFO_SWITCH_SECONDS", "4"))
+        smoothing = number("BAR_SMOOTHING", "0.2")
+        if smoothing > 1:
+            raise ValueError("BAR_SMOOTHING must be at most 1")
+        return cls(number("REFRESH_SECONDS", "0.5"), number("FRAME_SECONDS", "0.1"), smoothing, unit, number("WEATHER_REFRESH_SECONDS", "900"), number("NETWORK_REFRESH_SECONDS", "10"), number("INFO_SWITCH_SECONDS", "4"))

@@ -18,6 +18,7 @@ def _number(values: dict[str, str | None], name: str, default: str) -> float:
 class BioTechConfig:
     refresh_seconds: float
     frame_seconds: float
+    bar_smoothing: float
     weather_unit: str
     weather_refresh_seconds: float
     network_refresh_seconds: float
@@ -30,6 +31,7 @@ class BioTechConfig:
         config = cls(
             refresh_seconds=_number(values, "REFRESH_SECONDS", "0.5"),
             frame_seconds=_number(values, "FRAME_SECONDS", "0.1"),
+            bar_smoothing=_number(values, "BAR_SMOOTHING", "0.2"),
             weather_unit=(values.get("WEATHER_UNIT") or "F").strip().upper(),
             weather_refresh_seconds=_number(values, "WEATHER_REFRESH_SECONDS", "900"),
             network_refresh_seconds=_number(values, "NETWORK_REFRESH_SECONDS", "10"),
@@ -39,6 +41,7 @@ class BioTechConfig:
         if min(
             config.refresh_seconds,
             config.frame_seconds,
+            config.bar_smoothing,
             config.weather_refresh_seconds,
             config.network_refresh_seconds,
             config.info_switch_seconds,
@@ -46,4 +49,6 @@ class BioTechConfig:
             raise ValueError("BioTech timing and speed values must be greater than zero")
         if config.weather_unit not in ("C", "F"):
             raise ValueError("WEATHER_UNIT must be C or F")
+        if config.bar_smoothing > 1:
+            raise ValueError("BAR_SMOOTHING must be at most 1")
         return config

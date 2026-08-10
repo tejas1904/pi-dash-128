@@ -15,6 +15,7 @@ def number(values, name: str, default: str) -> float:
 class Config:
     refresh: float
     frame: float
+    bar_smoothing: float
     weather_unit: str
     weather_refresh: float
     network_refresh: float
@@ -24,9 +25,11 @@ class Config:
     @classmethod
     def load(cls) -> "Config":
         values = dotenv_values(Path(__file__).with_name("config.env"))
-        config = cls(number(values, "REFRESH_SECONDS", "0.5"), number(values, "FRAME_SECONDS", "0.1"), (values.get("WEATHER_UNIT") or "F").upper(), number(values, "WEATHER_REFRESH_SECONDS", "900"), number(values, "NETWORK_REFRESH_SECONDS", "10"), number(values, "INFO_SWITCH_SECONDS", "4"), (values.get("ANIMATE") or "true").lower() == "true")
-        if min(config.refresh, config.frame, config.weather_refresh, config.network_refresh, config.info_switch) <= 0:
+        config = cls(number(values, "REFRESH_SECONDS", "0.5"), number(values, "FRAME_SECONDS", "0.1"), number(values, "BAR_SMOOTHING", "0.2"), (values.get("WEATHER_UNIT") or "F").upper(), number(values, "WEATHER_REFRESH_SECONDS", "900"), number(values, "NETWORK_REFRESH_SECONDS", "10"), number(values, "INFO_SWITCH_SECONDS", "4"), (values.get("ANIMATE") or "true").lower() == "true")
+        if min(config.refresh, config.frame, config.bar_smoothing, config.weather_refresh, config.network_refresh, config.info_switch) <= 0:
             raise ValueError("Alien timing values must be greater than zero")
         if config.weather_unit not in ("C", "F"):
             raise ValueError("WEATHER_UNIT must be C or F")
+        if config.bar_smoothing > 1:
+            raise ValueError("BAR_SMOOTHING must be at most 1")
         return config
