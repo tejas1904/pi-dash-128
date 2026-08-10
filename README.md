@@ -6,7 +6,7 @@ information.
 
 <img src="assets/pic.jpg" alt="PiDash128 running on a 128x64 OLED" width="25%">
 
-## Design previews
+### Designs
 
 | Alien | BioTech | Cyberpunk | F1 | Matrix Movie |
 |:---:|:---:|:---:|:---:|:---:|
