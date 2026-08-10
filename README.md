@@ -50,6 +50,12 @@ Available designs are:
 - `f1` — rev lights, segmented meters, CPU trace, system and network telemetry
 - `steampunk` — gauges, rotating gears, and rising steam
 
+### Design previews
+
+| Alien | BioTech | Cyberpunk | F1 | Matrix Movie |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="assets/alien.jpg" alt="Alien dashboard design" width="125"> | <img src="assets/biotech.jpg" alt="BioTech dashboard design" width="125"> | <img src="assets/cyberpunk.jpg" alt="Cyberpunk dashboard design" width="125"> | <img src="assets/f1.jpg" alt="F1 dashboard design" width="125"> | <img src="assets/matrix_movie.jpg" alt="Matrix Movie dashboard design" width="125"> |
+
 Design-specific settings are stored in the selected design's `config.env`.
 To add another design, create a design folder following the same structure;
 no central registration is needed.
