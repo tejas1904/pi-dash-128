@@ -1,6 +1,7 @@
 """Animated one-bit Formula racing telemetry page."""
 
 from dataclasses import replace
+import math
 import time
 
 from PIL import Image, ImageDraw, ImageFont
@@ -31,6 +32,21 @@ def _shift_lights(draw: ImageDraw.ImageDraw, percent: float, phase: int) -> None
             draw.rectangle((x, 2, x + 3, 4), fill=1)
         else:
             draw.point((x, 3), fill=1)
+
+
+def _cpu_gear(percent: float) -> tuple[int, float]:
+    """Return the 1-5 CPU gear and progress through its 20-point band."""
+    value = max(0.0, min(100.0, percent))
+    gear = max(1, min(5, math.ceil(value / 20)))
+    progress = (value - (gear - 1) * 20) * 5
+    return gear, progress
+
+
+def _smooth_cpu(current: float, target: float, smoothing: float) -> float:
+    """Ease toward a load without crossing more than one gear per frame."""
+    change = (target - current) * smoothing
+    change = max(-20.0, min(20.0, change))
+    return current + change
 
 
 def _telemetry_bar(
@@ -87,6 +103,7 @@ def render_dashboard(
     panel: int,
     cpu_history: list[float],
     phase: int = 0,
+    gear_flash: bool = False,
 ) -> Image.Image:
     """Render one 128x64 Formula telemetry frame."""
     image = Image.new("1", size)
@@ -94,14 +111,19 @@ def render_dashboard(
     width, height = size
 
     # Chamfered timing-tower header.
-    draw.polygon(((1, 1), (25, 1), (29, 5), (25, 10), (1, 10)), fill=1)
-    draw.text((3, 0), "P01", font=FONT, fill=0)
-    _shift_lights(draw, metrics.cpu_percent, phase)
+    gear, gear_progress = _cpu_gear(metrics.cpu_percent)
+    badge = ((1, 1), (25, 1), (29, 5), (25, 10), (1, 10))
+    if gear_flash:
+        draw.polygon(badge, outline=1)
+    else:
+        draw.polygon(badge, fill=1)
+        draw.text((3, 0), f"G {gear:02d}", font=FONT, fill=0)
+    _shift_lights(draw, gear_progress, phase)
     draw.line((97, 1, width - 2, 1, width - 2, 8), fill=1)
     _text_right(draw, 124, 1, "LIVE")
 
     draw.text((2, 13), "CPU", font=FONT, fill=1)
-    _telemetry_bar(draw, 15, metrics.cpu_percent, phase)
+    _telemetry_bar(draw, 15, gear_progress, phase)
     _text_right(draw, 126, 13, f"{metrics.cpu_percent:.0f}%")
 
     draw.text((2, 24), "RAM", font=FONT, fill=1)
@@ -138,6 +160,8 @@ class Design:
         cpu_history = [metrics.cpu_percent]
         smooth_cpu = metrics.cpu_percent
         smooth_ram = metrics.ram_percent
+        displayed_gear = _cpu_gear(smooth_cpu)[0]
+        gear_flash_frames = 0
 
         while True:
             frame_started = time.monotonic()
@@ -148,7 +172,13 @@ class Design:
                 cpu_history.append(metrics.cpu_percent)
                 cpu_history = cpu_history[-61:]
                 updated = now
-            smooth_cpu += (metrics.cpu_percent - smooth_cpu) * self.config.bar_smoothing
+            smooth_cpu = _smooth_cpu(
+                smooth_cpu, metrics.cpu_percent, self.config.bar_smoothing
+            )
+            next_gear = _cpu_gear(smooth_cpu)[0]
+            if next_gear != displayed_gear:
+                gear_flash_frames = 4 if next_gear > displayed_gear else 2
+                displayed_gear = next_gear
             smooth_ram += (metrics.ram_percent - smooth_ram) * self.config.bar_smoothing
             smooth_metrics = replace(
                 metrics, cpu_percent=smooth_cpu, ram_percent=smooth_ram
@@ -157,8 +187,18 @@ class Design:
             panel = int((now - started) / self.config.info_switch_seconds) % 3
             device.display(
                 render_dashboard(
-                    device.size, smooth_metrics, info, panel, cpu_history, phase
+                    device.size,
+                    smooth_metrics,
+                    info,
+                    panel,
+                    cpu_history,
+                    phase,
+                    gear_flash=self.config.animate
+                    and self.config.gear_shift_flash
+                    and gear_flash_frames > 0
+                    and gear_flash_frames % 2 == 0,
                 )
             )
+            gear_flash_frames = max(0, gear_flash_frames - 1)
             elapsed = time.monotonic() - frame_started
             time.sleep(max(0, self.config.frame_seconds - elapsed))
